@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom'
 import '../../assets/styles/main.scss'
 
 const Navbar: React.FC = () => {
+
+
+
     return (
         <section className="nav-container">
             <h1 className="heading">

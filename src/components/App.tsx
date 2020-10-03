@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Navbar from './Navbar/Navbar'
 import TVShows from './TVShows/TVShows'
 import Movies from './Movies/Movies'
+import { MovieProvider } from './GlobalContext'
+import '../assets/styles/main.scss'
 
 const App: React.FC = () => {
     return (
@@ -13,7 +15,9 @@ const App: React.FC = () => {
                 <Navbar />
                 <Switch>
                     <Route exact path="/" component={TVShows} />
-                    <Route path="/movies" component={Movies} />
+                    <MovieProvider>
+                        <Route path="/movies" component={Movies} />
+                    </MovieProvider>
                 </Switch>
             </Router>
         </div>

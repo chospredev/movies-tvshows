@@ -4,11 +4,17 @@ import '../../assets/styles/main.scss'
 
 interface Props {
     placeholderText: string
+    value?: string
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+    submitInput?: (e: React.FormEvent<HTMLFormElement>) => void
 }
 
-const Search: React.FC<Props> = ({  placeholderText }) => {
+const Search: React.FC<Props> = ({ placeholderText, onChange, submitInput }) => {
+
     return (
-        <input className="search" type="text" placeholder={placeholderText} />
+        <form onSubmit={submitInput}>
+            <input onChange={onChange} className="search" type="text" placeholder={placeholderText} />
+        </form>
     )
 }
 
