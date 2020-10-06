@@ -58,7 +58,7 @@ const Movies: FC<IMoviesState> = ({ placeholderText }) => {
             })
     }
 
-    placeholderText = 'Search for any TV Show..'
+    placeholderText = 'Search for any TV Show...'
 
     const suggestionSelected = (value: string): void => {
         setState((prevState) => ({ ...prevState, query: value, suggestions: [] }))
