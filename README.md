@@ -23,8 +23,10 @@ commands to clone your repository:
 Afterwards you will need Node Package Manager to install node_modules.
 Install Node latest version on your machine.
 (You can check your Node version by typing "node -v" in your terminal without quotations)
+### node -v
 Then, Node should install package manager to help you handle the installation of required files.
 (You can check your Node Package Manager version by typing "npm -v" in your terminal without quotations, as well)
+### npm -v
 
 After checking all out, run npm install in your /tvshow-movies-manager directory.
 Just like this:
