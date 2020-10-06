@@ -1,4 +1,37 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### IMPORTANT!
+The app doesn't function as required because I started learning TypeScript 7 days ago,
+I learned very much and very few in the last couple of days.
+I faced problems when I tried to connect the whole app to the Context API.
+
+I was googling for fixes, but with no luck.
+I would really like to learn this stuff, it seems like fun!
+
+App doesn't function properly because I didn't configured global state management,
+without that, I couldn't respect last 2 parts of assignment.
+
+### Application Requirements
+
+To run this project you'll need some basic files and softwares.
+First you will need Git to clone this repository to your machine.
+
+(WINDOWS Users):
+Open Command Prompt or Windows Terminal or even Windows Powershell and run this
+commands to clone your repository:
+
+### `git clone https://github.com/chospredev/tvshow-movies-manager.git`
+
+Afterwards you will need Node Package Manager to install node_modules.
+Install Node latest version on your machine.
+(You can check your Node version by typing "node -v" in your terminal without quotations)
+Then, Node should install package manager to help you handle the installation of required files.
+(You can check your Node Package Manager version by typing "npm -v" in your terminal without quotations, as well)
+
+After checking all out, run npm install in your /tvshow-movies-manager directory.
+Just like this:
+### `npm install`
+
+After npm finished installing required files, run the application with the command below.
+### `npm start`
 
 ## Available Scripts
 
