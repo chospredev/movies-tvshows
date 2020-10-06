@@ -1,23 +1,21 @@
-import React from 'react'
-// @ts-ignore
+import React, { FC } from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
 import Navbar from './Navbar/Navbar'
 import TVShows from './TVShows/TVShows'
 import Movies from './Movies/Movies'
-import { MovieProvider } from './GlobalContext'
+import MovieCard from './DetailedViewCard/MovieCard'
 import '../assets/styles/main.scss'
 
-const App: React.FC = () => {
+const App: FC = () => {
     return (
-        <div>
+        <div className="wrapper">
             <Router>
                 <Navbar />
                 <Switch>
                     <Route exact path="/" component={TVShows} />
-                    <MovieProvider>
-                        <Route path="/movies" component={Movies} />
-                    </MovieProvider>
+                    <Route path="/movies" component={Movies} />
+                    <Route path="/movie-details" component={MovieCard} />
                 </Switch>
             </Router>
         </div>

@@ -1,87 +1,119 @@
-import React, { ChangeEvent, FC, FormEvent, useEffect, useState, useContext } from 'react'
+import React, { ChangeEvent, FC, Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
+import { Link, Route } from 'react-router-dom'
 
-import '../../assets/styles/main.scss'
 import Search from '../Search/Search'
 import { discoverMoviesEndpoint, searchMoviesEndpoint } from '../../utils/api'
-import { MovieContext } from '../GlobalContext'
+import '../../assets/styles/main.scss'
 
 interface IMoviesState {
-    placeholderText?: string,
-    searchResults?: [],
     popularResults?: [],
-    find?: string
+    suggestions?: []
+    placeholderText?: string,
+    query?: string,
+    loading?: boolean,
 }
 
 type InputElement = ChangeEvent<HTMLInputElement>
-type FormElement = FormEvent<HTMLFormElement>
 
-const Movies: FC<IMoviesState> = ({ placeholderText }): JSX.Element => {
+const Movies: FC<IMoviesState> = ({ placeholderText }) => {
 
-    // const [state, setState] = useState<IMoviesState>({
-    //     popularResults: [],
-    //     searchResults: [],
-    //     find: ''
-    // })
+    const [state, setState] = useState<IMoviesState>({
+        popularResults: [],
+        suggestions: [],
+        query: '',
+        loading: false,
+    })
 
-    const [state, setState] = useContext(MovieContext)
+    const { popularResults, query, suggestions, loading } = state
 
     const handleSearchInput = (e: InputElement): void => {
-        const { value } = e.target
-        setState(prevState => ({ ...prevState, find: value }))
-    }
-
-    const fetchSearch = (e: FormElement): void => {
-        e.preventDefault()
-        axios(searchMoviesEndpoint + state.find)
-            .then(({ data }) => {
-                let searchResults = data.results;
-                setState((prevState) => ({ ...prevState, searchResults }))
-            })
+        const query = e.currentTarget.value
+        setState((prevState) => ({ ...prevState, query }))
+        if (query.length > 0) {
+            setTimeout(() => {
+                axios(`${searchMoviesEndpoint}` + query)
+                    .then(({ data }) => {
+                        let results = data.results
+                        let suggestions = results.slice(0, 10)
+                        if (query.length > 2) {
+                            const regex = new RegExp(`^${query}`, 'i')
+                            suggestions.sort((prop: any) => prop.release_date).filter((val: any) => regex.test(val))
+                            setState((prevState) => ({ ...prevState, query, suggestions, loading: false, popularResults: [] }))
+                        } else {
+                            fetchMovies()
+                            setState((prevState) => ({ ...prevState, suggestions: [] }))
+                        }
+                    })
+                    .catch((err) => console.error(err))
+            }, 1000)
+        } return null
     }
 
     const fetchMovies = (): void => {
-        axios(discoverMoviesEndpoint)
+        axios(`${discoverMoviesEndpoint}`)
             .then(({ data }) => {
                 let popularResults = data.results
                 setState((prevState) => ({ ...prevState, popularResults }))
             })
     }
 
+    placeholderText = 'Search for any TV Show..'
+
+    const suggestionSelected = (value: string): void => {
+        setState((prevState) => ({ ...prevState, query: value, suggestions: [] }))
+    }
+
+    const renderSuggestedSearch = () => {
+        if (suggestions.length === 0) {
+            return null
+        } else {
+            return (
+                <ul>
+                    {suggestions.map((item: any, idx: number) => (
+                        <li className="suggestions" onClick={() => suggestionSelected(item.title)} key={idx}>{item.title}</li>
+                    ))}
+                </ul>
+            )
+        }
+    }
+
+    const popularResultsRender = popularResults.slice(0, 10).map((item: any, index: any) => {
+        return (
+            <div className="card" key={index}>
+                <img className="image" alt="cover" src={`http://image.tmdb.org/t/p/w300/${item.poster_path}`} />
+                <h1 className="title"><a href="https">{item.name}</a></h1>
+                <p className="overview">{item.overview}</p>
+            </div>
+        )
+    })
+
     useEffect(() => {
         fetchMovies()
     }, [])
 
-
-    placeholderText = 'Search for any movie..'
-
-    const searchResultsRender = state.searchResults.map((item: any, index: number) => {
-        return (
-            <div key={index}>
-                <h1>{item.title}</h1>
-            </div>
-        )
-    })
-
-    const popularResultsRender = state.popularResults.slice(0, 10).map((item: any, index: any) => {
-        return (
-            <div key={index}>
-                <h1>{item.title}</h1>
-            </div>
-        )
-    })
+    if (loading) {
+        return <p className="loading-indicator">Loading...</p>
+    }
 
     return (
-        <section className="movies-container">
-            <h1>Movies</h1>
-            <section className="search-bar">
-                <Search onChange={handleSearchInput} submitInput={fetchSearch} placeholderText={placeholderText} />
+        <Fragment>
+            <section className="movies-container">
+                <h1>Movies</h1>
+                <section className="search-bar">
+                    <Search value={query} onChange={handleSearchInput} placeholderText={placeholderText} />
+                    <section>
+                        {renderSuggestedSearch()}
+                    </section>
+                </section>
+                <h1 className="popular-heading"><span className="popular">Popular</span> Movie Exclusives</h1>
             </section>
-            <section>
-                {searchResultsRender}
-                {popularResultsRender}
+            <section className="cards-wrapper">
+                <section className="cards">
+                    {popularResultsRender}
+                </section>
             </section>
-        </section>
+        </Fragment>
     )
 }
 

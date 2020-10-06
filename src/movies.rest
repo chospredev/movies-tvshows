@@ -3,3 +3,7 @@ GET https://api.themoviedb.org/3/search/movie?api_key=4e655d3961ece923217665e9eb
 ###
 
 GET https://api.themoviedb.org/3/discover/movie?api_key=4e655d3961ece923217665e9eb266403
+
+###
+
+GET https://api.themoviedb.org/3/discover/tv?api_key=4e655d3961ece923217665e9eb266403

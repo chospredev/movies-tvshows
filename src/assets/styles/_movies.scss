@@ -3,6 +3,9 @@
 	color: rgb(255, 255, 255);
 
 	height: 100%;
+	width: 100%;
+
+	font-size: 14px;
 
 	display: flex;
 	flex-direction: column;
@@ -12,5 +15,109 @@
 
 	.search-bar {
 		margin-top: 20px;
+	}
+
+	.popular-heading {
+		margin-top: 100px;
+		font-size: 48px;
+
+		.popular {
+			color: red;
+		}
+	}
+
+	input {
+		width: 600px;
+		border: none;
+		font-size: 14px;
+		color: rgba(0, 0, 0, 0.73);
+		padding: 10px 5px;
+		box-sizing: border-box;
+		outline: none;
+		background-color: rgb(255, 255, 255);
+	}
+
+	ul {
+		list-style: none;
+		text-align: left;
+		margin: 0;
+		padding: 0;
+		border-top: 1px solid gray;
+		background-color: white;
+		color: black;
+
+		&::before {
+			content: "";
+		}
+
+		li {
+			padding: 10px 5px;
+			cursor: pointer;
+			background-color: white;
+
+			&:hover {
+				background: lightgray;
+			}
+		}
+	}
+}
+
+.cards-wrapper {
+	height: 100vh;
+	margin: 0;
+	display: grid;
+	place-items: center;
+
+	.cards {
+		display: flex;
+
+		.card {
+			background: black;
+			border-radius: 1rem;
+			padding: 2rem;
+			border-bottom: 6px solid white;
+			transition: 0.2s;
+
+			&:not(:first-child) {
+				margin-left: -4rem;
+			}
+
+			&:hover,
+			&:focus-within {
+				transform: translateY(-1rem);
+
+				.title {
+					a {
+						color: red;
+					}
+				}
+
+				~ .card,
+				&:focus-within {
+					transform: translateX(4rem);
+					background: rgba(black, 1);
+				}
+			}
+
+			.title {
+				margin-top: 10px;
+				color: white;
+				background: rgba(black, 0);
+
+				a {
+					text-decoration: none;
+					color: white;
+				}
+			}
+			.overview {
+				margin-top: 10px;
+				color: white;
+				background: rgba(black, 0);
+			}
+
+			img {
+				background: rgba(black, 0);
+			}
+		}
 	}
 }

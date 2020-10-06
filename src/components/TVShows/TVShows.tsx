@@ -1,42 +1,57 @@
-import React, { ChangeEvent, FC, FormEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, FC, Fragment, useEffect, useState } from 'react'
 import axios from 'axios'
+import { createBrowserHistory } from 'history'
+import { Link } from 'react-router-dom'
 
-import '../../assets/styles/main.scss'
 import Search from '../Search/Search'
 import { discoverTVShowsEndpoint, searchShowsEndpoint } from '../../utils/api'
+import '../../assets/styles/main.scss'
 
 interface ITVShowsState {
-    loading?: boolean,
-    placeholderText?: string,
-    searchResults?: [],
     popularResults?: [],
-    find?: string,
+    suggestions?: []
+    placeholderText?: string,
+    query?: string,
+    loading?: boolean,
 }
 
 type InputElement = ChangeEvent<HTMLInputElement>
-type FormElement = FormEvent<HTMLFormElement>
 
 const Movies: FC<ITVShowsState> = ({ placeholderText }) => {
 
+    const history = createBrowserHistory()
+
     const [state, setState] = useState<ITVShowsState>({
-        find: '',
-        searchResults: [],
         popularResults: [],
+        suggestions: [],
+        query: '',
+        loading: false,
     })
 
-    const handleSearchInput = (e: InputElement): void => {
-        const { value } = e.target
-        setState((prevState => ({ ...prevState, find: value })))
-    }
+    const { popularResults, suggestions, query, loading } = state
 
-    const fetchSearch = (e: FormElement): void => {
-        e.preventDefault()
-        axios(`${searchShowsEndpoint}` + state.find)
-            .then(({ data }) => {
-                let searchResults = data.results
-                console.log(searchResults)
-                setState((prevState) => ({ ...prevState, searchResults }))
-            })
+    const handleSearchInput = (e: InputElement): void => {
+        const query = e.target.value
+        setState((prevState) => ({ ...prevState, query }))
+        if (query.length > 0) {
+            setTimeout(() => {
+                axios(`${searchShowsEndpoint}` + query)
+                    .then(({ data }) => {
+                        let results = data.results
+                        console.log(results)
+                        let suggestions = results.slice(0, 10)
+                        if (query.length > 2) {
+                            const regex = new RegExp(`^${query}`, 'i')
+                            suggestions.sort((prop: any) => prop.release_date).filter((val: any) => regex.test(val))
+                            setState((prevState) => ({ ...prevState, suggestions, query, loading: false, popularResults: [] }))
+                        } else {
+                            fetchTVShows()
+                            setState((prevState) => ({ ...prevState, suggestions: [] }))
+                        }
+                    })
+                    .catch((err) => console.error(err))
+            }, 1000)
+        } return null
     }
 
     const fetchTVShows = (): void => {
@@ -50,18 +65,30 @@ const Movies: FC<ITVShowsState> = ({ placeholderText }) => {
 
     placeholderText = 'Search for any TV Show..'
 
-    const searchResultsRender = state.searchResults.map((item: any, index: number) => {
-        return (
-            <div key={index}>
-                <h1>{item.name}</h1>
-            </div>
-        )
-    })
+    const suggestionSelected = (value: string) => {
+        setState((prevState) => ({ ...prevState, query: value, suggestions: [] }))
+    }
 
-    const popularResultsRender = state.popularResults.slice(0, 10).map((item: any, index: any) => {
+    const renderSuggestedSearch = () => {
+        if (suggestions.length !== 0) {
+            return (
+                <ul>
+                    {suggestions.map((item: any, idx: number) => (
+                        <Link to="/movie-details"><li className="suggestions" onClick={() => suggestionSelected(item.name)} key={idx}>{item.name}</li></Link>
+                    ))}
+                </ul>
+            )
+        } else {
+            return null
+        }
+    }
+
+    const popularResultsRender = popularResults.slice(0, 10).map((item: any, index: any) => {
         return (
-            <div key={index}>
-                <h1>{item.name}</h1>
+            <div className="card" key={index}>
+                <img className="image" alt="cover" src={`http://image.tmdb.org/t/p/w300/${item.poster_path}`} />
+                <h1 className="title"><a href="https">{item.name}</a></h1>
+                <p className="overview">{item.overview}</p>
             </div>
         )
     })
@@ -70,19 +97,28 @@ const Movies: FC<ITVShowsState> = ({ placeholderText }) => {
         fetchTVShows()
     }, [])
 
+    if (loading) {
+        return <p className="loading-indicator">Loading...</p>
+    }
+
     return (
-        <section className="tvshows-container">
-            <h1>TV Shows</h1>
-            <section className="search-bar">
-                <Search onChange={handleSearchInput} submitInput={fetchSearch} placeholderText={placeholderText} />
+        <Fragment>
+            <section className="tvshows-container">
+                <h1>TV Shows</h1>
+                <section className="search-bar">
+                    <Search value={query} onChange={handleSearchInput} placeholderText={placeholderText} />
+                    <section>
+                        {renderSuggestedSearch()}
+                    </section>
+                </section>
+                <h1 className="popular-heading"><span className="popular">Popular</span> TV Show Exclusives</h1>
             </section>
-            <section className="search-section">
-                {searchResultsRender}
+            <section className="cards-wrapper">
+                <section className="cards">
+                    {popularResultsRender}
+                </section>
             </section>
-            <section className="popular-shows-section">
-                {popularResultsRender}
-            </section>
-        </section>
+        </Fragment>
     )
 }
 
