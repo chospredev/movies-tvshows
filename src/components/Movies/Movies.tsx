@@ -1,99 +1,50 @@
-import React, { ChangeEvent, FC, Fragment, useEffect, useState } from 'react'
-import axios from 'axios'
-import { Link, Route } from 'react-router-dom'
+import React, { FC, Fragment, useEffect, useContext } from 'react'
 
+import { MovieContext } from '../../helpers/ContextAPI/MovieContext'
 import Search from '../Search/Search'
-import { discoverMoviesEndpoint, searchMoviesEndpoint } from '../../utils/api'
 import '../../assets/styles/main.scss'
+import Movie from './Movie'
+import Popup from '../Popup/Popup'
 
-interface IMoviesState {
-    popularResults?: [],
-    suggestions?: []
+interface IProps {
     placeholderText?: string,
-    query?: string,
-    loading?: boolean,
 }
 
-type InputElement = ChangeEvent<HTMLInputElement>
+const Movies: FC<IProps> = ({ placeholderText }) => {
 
-const Movies: FC<IMoviesState> = ({ placeholderText }) => {
+    const { state,
+        fetchMovies,
+        handleSearchInput,
+        renderSuggestedSearch,
+    } = useContext(MovieContext)
 
-    const [state, setState] = useState<IMoviesState>({
-        popularResults: [],
-        suggestions: [],
-        query: '',
-        loading: false,
-    })
+    const { loading, query } = state
 
-    const { popularResults, query, suggestions, loading } = state
 
-    const handleSearchInput = (e: InputElement): void => {
-        const query = e.currentTarget.value
-        setState((prevState) => ({ ...prevState, query }))
-        if (query.length > 0) {
-            setTimeout(() => {
-                axios(`${searchMoviesEndpoint}` + query)
-                    .then(({ data }) => {
-                        let results = data.results
-                        let suggestions = results.slice(0, 10)
-                        if (query.length > 2) {
-                            const regex = new RegExp(`^${query}`, 'i')
-                            suggestions.sort((prop: any) => prop.release_date).filter((val: any) => regex.test(val))
-                            setState((prevState) => ({ ...prevState, query, suggestions, loading: false, popularResults: [] }))
-                        } else {
-                            fetchMovies()
-                            setState((prevState) => ({ ...prevState, suggestions: [] }))
-                        }
-                    })
-                    .catch((err) => console.error(err))
-            }, 1000)
-        } return null
-    }
+    placeholderText = 'Search for any movie...'
 
-    const fetchMovies = (): void => {
-        axios(`${discoverMoviesEndpoint}`)
-            .then(({ data }) => {
-                let popularResults = data.results
-                setState((prevState) => ({ ...prevState, popularResults }))
-            })
-    }
-
-    placeholderText = 'Search for any TV Show...'
-
-    const suggestionSelected = (value: string): void => {
-        setState((prevState) => ({ ...prevState, query: value, suggestions: [] }))
-    }
-
-    const renderSuggestedSearch = () => {
-        if (suggestions.length === 0) {
-            return null
-        } else {
-            return (
-                <ul>
-                    {suggestions.map((item: any, idx: number) => (
-                        <li className="suggestions" onClick={() => suggestionSelected(item.title)} key={idx}>{item.title}</li>
-                    ))}
-                </ul>
-            )
-        }
-    }
-
-    const popularResultsRender = popularResults.slice(0, 10).map((item: any, index: any) => {
-        return (
-            <div className="card" key={index}>
-                <img className="image" alt="cover" src={`http://image.tmdb.org/t/p/w300/${item.poster_path}`} />
-                <h1 className="title"><a href="https">{item.name}</a></h1>
-                <p className="overview">{item.overview}</p>
-            </div>
-        )
-    })
-
-    useEffect(() => {
-        fetchMovies()
-    }, [])
+    useEffect(fetchMovies, [])
 
     if (loading) {
         return <p className="loading-indicator">Loading...</p>
+    }
+
+    const openPopup = (id: number) => {
+        const filtered = state.popularResults.filter((result: any) => id === result.id)
+        filtered.map((filters: any) => {
+            return (
+                <>
+                    <Popup
+                        title={filters.title}
+                        poster_path={filters.poster_path}
+                        overview={filters.overview}
+                        release_date={filters.release_date}
+                        vote_average={filters.vote_average}
+                    />
+                </>
+            )
+        })
+        console.log(id)
     }
 
     return (
@@ -110,7 +61,7 @@ const Movies: FC<IMoviesState> = ({ placeholderText }) => {
             </section>
             <section className="cards-wrapper">
                 <section className="cards">
-                    {popularResultsRender}
+                    <Movie openPopup={openPopup} />
                 </section>
             </section>
         </Fragment>

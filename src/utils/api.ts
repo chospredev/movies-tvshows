@@ -1,5 +1,5 @@
-const url = 'https://api.themoviedb.org/3';
-const key = '4e655d3961ece923217665e9eb266403';
+export const url = 'https://api.themoviedb.org/3';
+export const key = '4e655d3961ece923217665e9eb266403';
 
 const movieEndpoint = `movie?api_key=${key}`;
 const showsEndpoint = `tv?api_key=${key}`;
