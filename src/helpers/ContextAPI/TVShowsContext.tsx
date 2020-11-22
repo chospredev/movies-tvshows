@@ -1,5 +1,4 @@
 import React, { ChangeEvent, useState, createContext, useContext, FC } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 import { discoverTVShowsEndpoint, searchShowsEndpoint } from '../../utils/api'
@@ -10,6 +9,7 @@ type InputElement = ChangeEvent<HTMLInputElement>
 interface IState {
     popularResults: [],
     suggestions: [],
+    selected: {},
     query: string,
     loading: boolean
 }
@@ -23,11 +23,12 @@ export const TVShowsContextProvider: FC = ({ children }) => {
     const [state, setState] = useState<IState>({
         popularResults: [],
         suggestions: [],
+        selected: {},
         query: searchTerm,
         loading: false,
     })
 
-    const { popularResults, suggestions } = state
+    const { suggestions } = state
 
     const handleSearchInput = (e: InputElement): void => {
         const query = e.target.value // defining query to be able to write into search bar through our state
@@ -104,18 +105,8 @@ export const TVShowsContextProvider: FC = ({ children }) => {
         }
     }
 
-    const popularResultsRender = popularResults.slice(0, 10).map((item: any, index: any) => { // displaying latest 10 results from popularResults array.
-        return (
-            <div className="card" key={index}>
-                <img className="image" alt="cover" src={`http://image.tmdb.org/t/p/w300/${item.poster_path}`} />
-                <h1 className="title"><a href="https">{item.name}</a></h1>
-                <p className="overview">{item.overview}</p>
-            </div>
-        )
-    })
-
     return (
-        <TVShowsContext.Provider value={{ state, setState, fetchTVShows, handleSearchInput, suggestionSelected, renderSuggestedSearch, popularResultsRender }}>
+        <TVShowsContext.Provider value={{ state, setState, fetchTVShows, handleSearchInput, suggestionSelected, renderSuggestedSearch }}>
             {children}
         </TVShowsContext.Provider>
     );

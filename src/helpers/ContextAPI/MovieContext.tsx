@@ -9,6 +9,7 @@ type InputElement = ChangeEvent<HTMLInputElement>
 interface IState {
     popularResults: [],
     suggestions: [],
+    selected: {},
     query: string
     loading: boolean
 }
@@ -22,6 +23,7 @@ export const MovieContextProvider: FC = ({ children }) => {
     const [state, setState] = useState<IState>({
         popularResults: [],
         suggestions: [],
+        selected: {},
         query: searchTerm,
         loading: false,
     })

@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react'
+import React, { FC, Fragment, useContext } from 'react'
 
 import { MovieContext } from '../../helpers/ContextAPI/MovieContext'
 
@@ -12,11 +12,13 @@ const Movie: FC<IProps> = ({ openPopup }) => {
 
     const popularResultsRender = popularResults.slice(0, 10).map((item: any, index: any) => {
         return (
-            <div onClick={() => openPopup(item.id)} className="card" key={index}>
-                <img className="image" alt="cover" src={`http://image.tmdb.org/t/p/w300/${item.poster_path}`} />
-                <h1 className="title"><a href="https">{item.title}</a></h1>
-                <p className="overview">{item.overview}</p>
-            </div>
+            <Fragment key={item.id}>
+                <div className="card" key={index}>
+                    <img onClick={() => openPopup(item.id)} className="image" alt="cover" src={`http://image.tmdb.org/t/p/w300/${item.poster_path}`} />
+                    <h1 className="title"><a href={`#movie/${item.title}/${item.id}`}>{item.title}</a></h1>
+                    <p className="overview">{item.overview}</p>
+                </div>
+            </Fragment>
         )
     })
 

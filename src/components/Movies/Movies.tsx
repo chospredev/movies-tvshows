@@ -4,7 +4,7 @@ import { MovieContext } from '../../helpers/ContextAPI/MovieContext'
 import Search from '../Search/Search'
 import '../../assets/styles/main.scss'
 import Movie from './Movie'
-import Popup from '../Popup/Popup'
+import MoviePopup from '../Popup/MoviePopup'
 
 interface IProps {
     placeholderText?: string,
@@ -13,12 +13,13 @@ interface IProps {
 const Movies: FC<IProps> = ({ placeholderText }) => {
 
     const { state,
+        setState,
         fetchMovies,
         handleSearchInput,
         renderSuggestedSearch,
     } = useContext(MovieContext)
 
-    const { loading, query } = state
+    const { loading, query, popularResults, selected } = state
 
 
     placeholderText = 'Search for any movie...'
@@ -29,22 +30,23 @@ const Movies: FC<IProps> = ({ placeholderText }) => {
         return <p className="loading-indicator">Loading...</p>
     }
 
-    const openPopup = (id: number) => {
-        const filtered = state.popularResults.filter((result: any) => id === result.id)
-        filtered.map((filters: any) => {
-            return (
-                <>
-                    <Popup
-                        title={filters.title}
-                        poster_path={filters.poster_path}
-                        overview={filters.overview}
-                        release_date={filters.release_date}
-                        vote_average={filters.vote_average}
-                    />
-                </>
-            )
-        })
-        console.log(id)
+    const openPopup = (idx: number) => {
+        const filtered = popularResults.filter((results: any) => results.id === idx)
+        const filteredTitle = filtered.map(({ title }: any) => title)
+        const filteredPosterPath = filtered.map(({ poster_path }: any) => poster_path)
+        const filteredOverview = filtered.map(({ overview }: any) => overview)
+        const filteredReleaseDate = filtered.map(({ release_date }: any) => release_date)
+        const filteredVoteAverage = filtered.map(({ vote_average }: any) => vote_average)
+        const destructuredTitle = filteredTitle[0]
+        const destructuredPosterPath = filteredPosterPath[0]
+        const destructuredOverview = filteredOverview[0]
+        const destructuredReleaseDate = filteredReleaseDate[0]
+        const destructuredVoteAverage = filteredVoteAverage[0]
+        setState((prev: any) => ({ ...prev, selected: { destructuredTitle, destructuredPosterPath, destructuredOverview, destructuredReleaseDate, destructuredVoteAverage } }))
+    }
+
+    const closePopup = () => {
+        setState((prev: any) => ({ ...prev, selected: {} }))
     }
 
     return (
@@ -64,6 +66,7 @@ const Movies: FC<IProps> = ({ placeholderText }) => {
                     <Movie openPopup={openPopup} />
                 </section>
             </section>
+            { (typeof selected.destructuredTitle != 'undefined') ? <MoviePopup selected={selected} close={closePopup} /> : false}
         </Fragment>
     )
 }

@@ -3,20 +3,23 @@ import React, { FC, Fragment, useContext, useEffect } from 'react'
 import { TVShowsContext } from '../../helpers/ContextAPI/TVShowsContext'
 import Search from '../Search/Search'
 import '../../assets/styles/main.scss'
+import TVShow from './TVShow'
+import ShowPopup from '../Popup/ShowPopup'
 
 interface IProps {
     placeholderText?: string,
 }
 
-const Movies: FC<IProps> = ({ placeholderText }) => {
+const TVShows: FC<IProps> = ({ placeholderText }) => {
 
     const { state,
+        setState,
         fetchTVShows,
         handleSearchInput,
         renderSuggestedSearch,
-        popularResultsRender } = useContext(TVShowsContext)
+    } = useContext(TVShowsContext)
 
-    const { query, loading } = state
+    const { query, loading, popularResults, selected } = state
 
     placeholderText = 'Search for any TV show..'
 
@@ -24,6 +27,25 @@ const Movies: FC<IProps> = ({ placeholderText }) => {
 
     if (loading) {
         return <p className="loading-indicator">Loading...</p>
+    }
+
+    const openPopup = (idx: number) => {
+        const filtered = popularResults.filter((results: any) => results.id === idx)
+        const filteredTitle = filtered.map(({ name }: any) => name)
+        const filteredPosterPath = filtered.map(({ poster_path }: any) => poster_path)
+        const filteredOverview = filtered.map(({ overview }: any) => overview)
+        const filteredReleaseDate = filtered.map(({ release_date }: any) => release_date)
+        const filteredVoteAverage = filtered.map(({ vote_average }: any) => vote_average)
+        const destructuredTitle = filteredTitle[0]
+        const destructuredPosterPath = filteredPosterPath[0]
+        const destructuredOverview = filteredOverview[0]
+        const destructuredReleaseDate = filteredReleaseDate[0]
+        const destructuredVoteAverage = filteredVoteAverage[0]
+        setState((prev: any) => ({ ...prev, selected: { destructuredTitle, destructuredPosterPath, destructuredOverview, destructuredReleaseDate, destructuredVoteAverage } }))
+    }
+
+    const closePopup = () => {
+        setState((prev: any) => ({ ...prev, selected: {} }))
     }
 
     return (
@@ -40,11 +62,12 @@ const Movies: FC<IProps> = ({ placeholderText }) => {
             </section>
             <section className="cards-wrapper">
                 <section className="cards">
-                    {popularResultsRender}
+                    <TVShow openPopup={openPopup} />
                 </section>
+                {(typeof selected.destructuredTitle != 'undefined') ? <ShowPopup selected={selected} close={closePopup} /> : false}
             </section>
         </Fragment>
     )
 }
 
-export default Movies
+export default TVShows

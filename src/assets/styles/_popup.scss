@@ -27,35 +27,40 @@
 			}
 		}
 
+		.image-or-trailer {
+			margin-top: 20px;
+		}
+
+		.title {
+			margin-top: 20px;
+			color: red;
+		}
+
+		.release-date {
+			font-size: 16px;
+		}
+
+		.overview {
+			margin-top: 10px;
+		}
+
 		.rating {
-			margin-bottom: 30px;
-		}
+			margin-top: 20px;
+			font-size: 18px;
 
-		.plot {
-			display: flex;
-			flex-wrap: wrap;
-			margin: 0px -15px 30px;
-
-			img {
-				flex: 1 1 50%;
-				max-width: 300px;
-				padding: 0px 15px;
-			}
-
-			p {
-				flex: 1 1 50%;
-				padding: 15px;
+			.icon {
+				color: goldenrod;
 			}
 		}
 
-		.close {
+		.backTo {
 			display: inline-block;
 			padding: 15px 30px;
 			font-size: 18px;
 			font-weight: 700;
 
-			background-color: #4484c4;
-			color: #fff;
+			background-color: rgb(0, 0, 0);
+			color: white;
 			border-radius: 8px;
 			border: none;
 			outline: none;
@@ -65,7 +70,8 @@
 			transition: 0.4s ease-out;
 
 			&:hover {
-				background-color: #223343;
+				background-color: black;
+				color: red;
 			}
 		}
 	}

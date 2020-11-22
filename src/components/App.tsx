@@ -8,7 +8,6 @@ import Navbar from './Navbar/Navbar'
 import TVShows from './TVShows/TVShows'
 import Movies from './Movies/Movies'
 import '../assets/styles/main.scss'
-import Popup from './Popup/Popup'
 
 const App: FC = () => {
 
@@ -22,9 +21,8 @@ const App: FC = () => {
                             <Route exact path="/" component={TVShows} />
                             <MovieContextProvider>
                                 <Route path="/movies" component={Movies} />
-                                <Route path="/detail" component={Popup} />
                             </MovieContextProvider>
-                        </TVShowsContextProvider> {/* it can be bugged, find out what happens. */}
+                        </TVShowsContextProvider>
                     </SearchContextProvider>
                 </Switch>
             </Router>
