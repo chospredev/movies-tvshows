@@ -28,4 +28,4 @@ After package manager finished installing required files, run the application wi
 
 ### NOTE:
 
-The search term isn't spread across components and search item cannot be selected to display modal. Those two things will be fixed shortly.
+### The search term isn't spread across components and search item cannot be selected to display modal. Those two things will be fixed shortly.
