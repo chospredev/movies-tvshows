@@ -1,4 +1,4 @@
-### IMPORTANT!
+### IMPORTANT: READ NOTE AT THE END OF DOCUMENT.
 
 Application Requirements
 
