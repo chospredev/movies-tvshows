@@ -8,6 +8,7 @@ import MoviePopup from '../Popup/MoviePopup'
 
 interface IProps {
     placeholderText?: string,
+    actualTerm: any
 }
 
 const Movies: FC<IProps> = ({ placeholderText }) => {

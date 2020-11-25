@@ -1,39 +1,24 @@
-import React, { ChangeEvent, useState, createContext, useContext, FC } from 'react';
+import React, { ChangeEvent, createContext, FC, useContext, useEffect } from 'react';
 import axios from 'axios';
 
 import { discoverTVShowsEndpoint, searchShowsEndpoint } from '../../utils/api'
-import { SearchContext } from './SearchContext';
+import { StateControllerContext } from './StateControllerContext';
 
 type InputElement = ChangeEvent<HTMLInputElement>
-
-interface IState {
-    popularResults: [],
-    suggestions: [],
-    selected: {},
-    query: string,
-    loading: boolean
-}
 
 export const TVShowsContext = createContext(null)
 
 export const TVShowsContextProvider: FC = ({ children }) => {
 
-    const { searchTerm, setSearchTerm } = useContext(SearchContext)
-
-    const [state, setState] = useState<IState>({
-        popularResults: [],
-        suggestions: [],
-        selected: {},
-        query: searchTerm,
-        loading: false,
-    })
+    const { state, setState } = useContext(StateControllerContext)
 
     const { suggestions } = state
+
 
     const handleSearchInput = (e: InputElement): void => {
         const query = e.target.value // defining query to be able to write into search bar through our state
         setState((prevState: any) => ({ ...prevState, query })) // this is making sure that onChange will fire
-        if (query.length > 0) { // we are checking up if our search term length is greater than 0 and if yes
+        if (query.length > 0 && query !== '') { // we are checking up if our search term length is greater than 0 and if yes
             setTimeout(() => { // triggering search after 1000 milliseconds / 1 second
                 axios(`${searchShowsEndpoint}` + query) // we then, are firing a request to our themoviedb server.
                     .then(({ data }) => {
@@ -42,9 +27,9 @@ export const TVShowsContextProvider: FC = ({ children }) => {
                         let suggestions = results.slice(0, 10) // we use slice() function to cut down only 10 query results.
                         if (query.length > 2) { // now, if query length is greater than 2 we are displaying results beneath the search bar.
                             const regex = new RegExp(`^${query}`, 'i') // here we are checking our regular expression to be able to filter search
-                            suggestions.sort((prop: any) => prop.release_date).filter((val: any) => regex.test(val)) // this function is self-explanatory - it sorts out query by release_date
-                            setState((prevState: any) => ({ ...prevState, suggestions, query, loading: false, popularResults: [] })) // here we are populating our state with results.
-                            setSearchTerm((prevQuery: any) => ({ ...prevQuery, searchTerm: query })) // here I need a fix, I need to store searchTerm state across 2 searchbars of movie and tvshow components 
+                            suggestions.sort((prop: any) => prop.first_air_date).filter((val: any) => regex.test(val)) // this function is self-explanatory - it sorts out query by release date
+                            setState((prevState: any) => ({ ...prevState, suggestions, loading: false, popularResults: [] })) // here we are populating our state with results.
+                            console.log('%c Suggestion nr. 1: ', 'color: red', state.suggestions)
                         } else {
                             fetchTVShows() // if we don't satisfy query terms, we are displaying a list of top 10 movies.
                             setState((prevState: any) => ({ ...prevState, suggestions: [] })) // reverting query back to empty array
@@ -87,8 +72,19 @@ export const TVShowsContextProvider: FC = ({ children }) => {
             })
     }
 
-    const suggestionSelected = (value: string) => {
-        setState((prevState: any) => ({ ...prevState, query: value, suggestions: [] })) // if we select an item from dropdown, we are populating our query with value.
+    const suggestionSelected = (value: string, idx: number) => {
+        const FILTERED_SUGGESTIONS = state.suggestions.filter((results: any) => results.id === idx)
+        const ORIGINAL_NAME = FILTERED_SUGGESTIONS.map(({ name }: any) => name)
+        const POSTER_PATH = FILTERED_SUGGESTIONS.map(({ poster_path }: any) => poster_path)
+        const SHOW_OVERVIEW = FILTERED_SUGGESTIONS.map(({ overview }: any) => overview)
+        const RELEASE_DATE = FILTERED_SUGGESTIONS.map(({ release_date }: any) => release_date)
+        const VOTE_AVERAGE = FILTERED_SUGGESTIONS.map(({ vote_average }: any) => vote_average)
+        const destructuredTitle = ORIGINAL_NAME[0]
+        const destructuredPosterPath = POSTER_PATH[0]
+        const destructuredOverview = SHOW_OVERVIEW[0]
+        const destructuredReleaseDate = RELEASE_DATE[0]
+        const destructuredVoteAverage = VOTE_AVERAGE[0]
+        setState((prevState: any) => ({ ...prevState, query: value, suggestions: [], selected: { destructuredTitle, destructuredPosterPath, destructuredOverview, destructuredReleaseDate, destructuredVoteAverage } })) // if we select an item from dropdown, we are populating our query with value.
     }
 
     const renderSuggestedSearch = () => {
@@ -96,7 +92,7 @@ export const TVShowsContextProvider: FC = ({ children }) => {
             return (
                 <ul>
                     {suggestions.map((item: any, idx: number) => (
-                        <li className="suggestions" onClick={() => suggestionSelected(item.name)} key={idx}>{item.name}</li>
+                        <li className="suggestions" onClick={() => suggestionSelected(item.name, item.id)} key={idx}>{item.name}</li>
                     ))}
                 </ul>
             )
@@ -106,8 +102,10 @@ export const TVShowsContextProvider: FC = ({ children }) => {
     }
 
     return (
-        <TVShowsContext.Provider value={{ state, setState, fetchTVShows, handleSearchInput, suggestionSelected, renderSuggestedSearch }}>
-            {children}
-        </TVShowsContext.Provider>
+        <>
+            <TVShowsContext.Provider value={{ state, setState, fetchTVShows, handleSearchInput, suggestionSelected, renderSuggestedSearch }}>
+                {children}
+            </TVShowsContext.Provider>
+        </>
     );
 }

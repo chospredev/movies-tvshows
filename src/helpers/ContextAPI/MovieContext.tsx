@@ -1,32 +1,16 @@
-import React, { ChangeEvent, useState, createContext, useContext, FC } from 'react';
+import React, { ChangeEvent, createContext, useContext, FC } from 'react';
 import axios from 'axios';
 
 import { discoverMoviesEndpoint, searchMoviesEndpoint } from '../../utils/api'
-import { SearchContext } from './SearchContext';
+import { StateControllerContext } from './StateControllerContext';
 
 type InputElement = ChangeEvent<HTMLInputElement>
-
-interface IState {
-    popularResults: [],
-    suggestions: [],
-    selected: {},
-    query: string
-    loading: boolean
-}
 
 export const MovieContext = createContext(null)
 
 export const MovieContextProvider: FC = ({ children }) => {
 
-    const { searchTerm, setSearchTerm } = useContext(SearchContext)
-
-    const [state, setState] = useState<IState>({
-        popularResults: [],
-        suggestions: [],
-        selected: {},
-        query: searchTerm,
-        loading: false,
-    })
+    const { state, setState } = useContext(StateControllerContext)
 
     const { suggestions } = state
 
@@ -43,10 +27,8 @@ export const MovieContextProvider: FC = ({ children }) => {
                             const regex = new RegExp(`^${query}`, 'i')
                             suggestions.sort((prop: any) => prop.release_date).filter((val: any) => regex.test(val))
                             setState((prevState: any) => ({ ...prevState, query, suggestions, loading: false, popularResults: [] }))
-                            setSearchTerm((prevQuery: any) => ({ ...prevQuery, query }))
                         } else {
                             fetchMovies()
-                            setState((prevState: any) => ({ ...prevState, suggestions: [] }))
                             setState((prevState: any) => ({ ...prevState, suggestions: [] }))
                         }
                     })
@@ -71,7 +53,7 @@ export const MovieContextProvider: FC = ({ children }) => {
             .then(({ data }) => {
                 let popularResults = data.results
                 console.log("%c Results", 'color: blue', data.results)
-                setState((prevState) => ({ ...prevState, popularResults }))
+                setState((prevState: any) => ({ ...prevState, popularResults }))
             })
             .catch((err) => {
                 if (err.response) {
@@ -87,8 +69,19 @@ export const MovieContextProvider: FC = ({ children }) => {
             })
     }
 
-    const suggestionSelected = (value: string): void => {
-        setState((prevState: any) => ({ ...prevState, query: value, suggestions: [] }))
+    const suggestionSelected = (value: string, idx: number): void => {
+        const FILTERED_SUGGESTIONS = state.suggestions.filter((results: any) => results.id === idx)
+        const ORIGINAL_TITLE = FILTERED_SUGGESTIONS.map(({ title }: any) => title)
+        const POSTER_PATH = FILTERED_SUGGESTIONS.map(({ poster_path }: any) => poster_path)
+        const SHOW_OVERVIEW = FILTERED_SUGGESTIONS.map(({ overview }: any) => overview)
+        const RELEASE_DATE = FILTERED_SUGGESTIONS.map(({ release_date }: any) => release_date)
+        const VOTE_AVERAGE = FILTERED_SUGGESTIONS.map(({ vote_average }: any) => vote_average)
+        const destructuredTitle = ORIGINAL_TITLE[0]
+        const destructuredPosterPath = POSTER_PATH[0]
+        const destructuredOverview = SHOW_OVERVIEW[0]
+        const destructuredReleaseDate = RELEASE_DATE[0]
+        const destructuredVoteAverage = VOTE_AVERAGE[0]
+        setState((prevState: any) => ({ ...prevState, query: value, suggestions: [], selected: { destructuredTitle, destructuredPosterPath, destructuredOverview, destructuredReleaseDate, destructuredVoteAverage } }))
     }
 
     const renderSuggestedSearch = () => {
@@ -98,7 +91,7 @@ export const MovieContextProvider: FC = ({ children }) => {
             return (
                 <ul>
                     {suggestions.map((item: any, idx: number) => (
-                        <li className="suggestions" onClick={() => suggestionSelected(item.title)} key={idx}>{item.title}</li>
+                        <li className="suggestions" onClick={() => suggestionSelected(item.title, item.id)} key={idx}>{item.title}</li>
                     ))}
                 </ul>
             )
@@ -106,8 +99,10 @@ export const MovieContextProvider: FC = ({ children }) => {
     }
 
     return (
-        <MovieContext.Provider value={{ state, setState, fetchMovies, handleSearchInput, suggestionSelected, renderSuggestedSearch }}>
-            {children}
-        </MovieContext.Provider>
+        <>
+            <MovieContext.Provider value={{ state, setState, fetchMovies, handleSearchInput, suggestionSelected, renderSuggestedSearch }}>
+                {children}
+            </MovieContext.Provider>
+        </>
     );
 }

@@ -3,27 +3,26 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
 import { MovieContextProvider } from '../helpers/ContextAPI/MovieContext'
 import { TVShowsContextProvider } from '../helpers/ContextAPI/TVShowsContext'
-import { SearchContextProvider } from '../helpers/ContextAPI/SearchContext'
 import Navbar from './Navbar/Navbar'
 import TVShows from './TVShows/TVShows'
 import Movies from './Movies/Movies'
 import '../assets/styles/main.scss'
+import { StateControllerProvider } from '../helpers/ContextAPI/StateControllerContext'
 
 const App: FC = () => {
-
     return (
         <div className="wrapper">
             <Router>
                 <Navbar />
                 <Switch>
-                    <SearchContextProvider>
+                    <StateControllerProvider>
                         <TVShowsContextProvider>
                             <Route exact path="/" component={TVShows} />
                             <MovieContextProvider>
                                 <Route path="/movies" component={Movies} />
                             </MovieContextProvider>
                         </TVShowsContextProvider>
-                    </SearchContextProvider>
+                    </StateControllerProvider>
                 </Switch>
             </Router>
         </div>
