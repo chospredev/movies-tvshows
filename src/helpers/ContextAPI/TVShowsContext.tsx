@@ -12,23 +12,28 @@ export const TVShowsContextProvider: FC = ({ children }) => {
 
     const { state, setState } = useContext(StateControllerContext)
 
-    const { suggestions } = state
-
+    const { suggestions, query } = state
 
     const handleSearchInput = (e: InputElement): void => {
-        const query = e.target.value // defining query to be able to write into search bar through our state
+        const query = e.target.value // defining query to be able to write input into search bar through our state
         setState((prevState: any) => ({ ...prevState, query })) // this is making sure that onChange will fire
-        if (query.length > 0 && query !== '') { // we are checking up if our search term length is greater than 0 and if yes
-            setTimeout(() => { // triggering search after 1000 milliseconds / 1 second
-                axios(`${searchShowsEndpoint}` + query) // we then, are firing a request to our themoviedb server.
+        if (query.length > 2) { // we are checking up if our search term length is greater than 2 and if yes
+            triggerQuery(query)
+        } return
+    }
+
+    function triggerQuery(query: any) {
+        if (query) {
+            setTimeout(() => {
+                axios(`${searchShowsEndpoint}` + query) // we are firing a request to our themoviedb server.
                     .then(({ data }) => {
                         let results = data.results // here we are fetching results to a variable
                         console.log(results)
                         let suggestions = results.slice(0, 10) // we use slice() function to cut down only 10 query results.
-                        if (query.length > 2) { // now, if query length is greater than 2 we are displaying results beneath the search bar.
+                        if (query.length > 2 && query) { // now, if query length is greater than 3 we are displaying results beneath the search bar. We have put 2 as a condition because it counts from zero.
                             const regex = new RegExp(`^${query}`, 'i') // here we are checking our regular expression to be able to filter search
                             suggestions.sort((prop: any) => prop.first_air_date).filter((val: any) => regex.test(val)) // this function is self-explanatory - it sorts out query by release date
-                            setState((prevState: any) => ({ ...prevState, suggestions, loading: false, popularResults: [] })) // here we are populating our state with results.
+                            setState((prevState: any) => ({ ...prevState, query, suggestions, loading: false, popularResults: [] })) // here we are populating our state with results.
                             console.log('%c Suggestion nr. 1: ', 'color: red', state.suggestions)
                         } else {
                             fetchTVShows() // if we don't satisfy query terms, we are displaying a list of top 10 movies.
@@ -47,9 +52,21 @@ export const TVShowsContextProvider: FC = ({ children }) => {
                             window.alert(`Oops, ${err}`)
                         }
                     })
-            }, 1000) // 1000 milliseconds = 1 second
-        } return null
+            }, 1000)
+        }
     }
+
+
+    useEffect(() => {
+        setTimeout(() => {
+            triggerQuery(query)
+        }, 3000)
+    }, [state.query]) // listening to query change, if there is one - re-render suggestions.
+    // NOTE: I have found out that this is bugged, but it works kind of.
+    // We can select item from dropdown suggestions and display it properly.
+    // Only thing to fix is re-rendering every time.
+
+
 
     const fetchTVShows = (): void => {
         axios(`${discoverTVShowsEndpoint}`) // firing request to our server

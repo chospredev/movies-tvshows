@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useContext, useEffect } from 'react'
+import React, { ChangeEvent, FC, Fragment, useContext, useEffect } from 'react'
 
 import { TVShowsContext } from '../../helpers/ContextAPI/TVShowsContext'
 import Search from '../Search/Search'
